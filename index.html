@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sistema Integrado de Fretes</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link href="styles.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      function calculateShipping() {
+        var cep = jQuery("#frete").val();
+
+        jQuery.ajax({
+          url: "cotacao.php",
+          type: "POST",
+          data: {
+            cep: cep,
+          },
+          success: function (response) {
+            let data = JSON.parse(response);
+            console.log(data);
+
+            // Limpar opções de entrega existentes
+            $(".delivery-option").remove();
+            $(".shipment-label").remove();
+
+            // Adicionar a label "Opções de Entrega"
+            $("<label>")
+              .addClass("shipment-label")
+              .text("Opções de Entrega:")
+              .appendTo(".mb-3");
+
+            // Iterar sobre cada item no array de resposta
+            data.forEach(function (item) {
+              // Criar nova opção de entrega
+              let deliveryOption = $("<div>")
+                .addClass("form-check delivery-option")
+                .css("margin", "16px 0");
+
+              // Detalhes da entrega
+              let deliveryDetails = $("<div>").addClass("delivery-details");
+              $("<input>")
+                .addClass("form-check-input")
+                .attr("type", "radio")
+                .attr("name", "deliveryOptions")
+                .attr("id", item.id)
+                .attr("value", item.name)
+                .appendTo(deliveryDetails);
+              $("<label>")
+                .addClass("form-check-label")
+                .attr("for", item.id)
+                .text(item.name)
+                .appendTo(deliveryDetails);
+              $('<span class="days">')
+                .text(item.delivery_time + " dias úteis")
+                .css("margin-top", "-6px")
+                .appendTo(deliveryDetails);
+
+              // Preço
+              let price = $("<div>").text("R$" + item.price);
+
+              // Adicionar detalhes da entrega e preço à opção de entrega
+              deliveryDetails.appendTo(deliveryOption);
+              price.appendTo(deliveryOption);
+
+              // Adicionar opção de entrega ao formulário
+              deliveryOption.appendTo(".mb-3");
+            });
+          },
+          error: function (response) {
+            console.log("Erro: ", response);
+          },
+        });
+      }
+
+      jQuery(document).ready(function ($) {
+        $("#simular-frete").click(function (event) {
+          event.preventDefault();
+          calculateShipping();
+        });
+      });
+    </script>
+    <h1 class="header">Sistema Integrado de Fretes</h1>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Catálogo</a></li>
+        <li class="breadcrumb-item active" aria-current="page">
+          <u>Nome do Produto</u>
+        </li>
+      </ol>
+    </nav>
+    <div class="row">
+      <div class="col">
+        <img src="" class="img-fluid" alt="Camiseta Branca" />
+      </div>
+      <div class="col">
+        <h1>Nome do Produto</h1>
+        <span
+          >Descrição do produto Descrição do produto Descrição do produto
+          Descrição do produto Descrição do produto Descrição do produto.</span
+        >
+        <p class="product-price">R$ 99,99</p>
+        <div class="container">
+          <form>
+            <div class="mb-4">
+              <label for="frete" class="form-label">Calcular Frete</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="frete"
+                  value="23812310"
+                />
+                <button type="submit" class="btn btn-dark" id="simular-frete">
+                  SIMULAR
+                </button>
+              </div>
+              <a
+                href="https://buscacepinter.correios.com.br/app/endereco/index.php"
+                class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover"
+                >Não sei meu cep</a
+              >
+            </div>
+          </form>
+        </div>
+        <div class="container">
+          <form>
+            <div class="mb-3"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
